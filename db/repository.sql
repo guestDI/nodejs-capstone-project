@@ -1,0 +1,6 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS User (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(60) NOT NULL unique
+);
