@@ -3,7 +3,7 @@ const util = require('util');
 const path = require('path');
 
 // Connect with SQLite database
-const db_path = path.join(__dirname, '../db', 'exercises-db');
+const db_path = path.join(__dirname, '../db', 'exercises.db');
 
 const db = new sqlite3.Database(db_path, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, err => {
   if (err) {

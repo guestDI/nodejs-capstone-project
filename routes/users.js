@@ -1,15 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-const { addUser, getUsers } = require("../controllers/users");
+const { addUser, getUsers, addExercise, getExerciseLog } = require("../controllers/users");
 
 router.post('/users', addUser);
 router.get('/users', getUsers);
-
-router.get('/users/:userId/logs', function(req, res) {
-    console.log(req.query)
-    console.log(req.params.userId)
-    res.send('done')
-});
+router.post('/users/:_id/exercises', addExercise);
+router.get('/users/:userId/logs', getExerciseLog);
 
 module.exports = router;
