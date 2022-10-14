@@ -1,70 +1,70 @@
-const { db } = require('../db/db') 
-const { v4: uuidv4 } = require('uuid')
 const { getExercisesLog } = require('../services/user_service')
+const User = require('../models/user')
+const Exercise = require('../models/exercise')
 
-const addUser = (req, res) => {
-    db.run(`INSERT INTO user (_id, username) VALUES (?,?)`,
-        [uuidv4(), req.body.username],
-        function (err) {
-            if (err) {
-                res.status(400).json({ "error": err.message })
-                return;
-            }
-            res.status(201).json({
-                "user_id": this.lastID
-            })
-        });
+const createUser = (req, res) => {
+    User.create({
+        username: req.body.username,
+    })
+    .then(user => {
+        res.json(user._id);
+    })
+    .catch(error => {
+        res.status(404).send(error);
+    })
 }
 
 const getExerciseLog = (req, res) => {
     const userId = req.params.userId
 
-   const limit = req.query.limit ? `LIMIT ${req.query.limit}` : ''
+    const limit = req.query.limit
 
-    const sql = `SELECT b.username, b._id, a.description, a.duration, a.date FROM Exercises as a INNER JOIN User AS b 
-    ON a.user_id = b._id WHERE a.user_id = '${userId}' ${limit};`
-
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-          return console.error(err.message);
-        }
-
-        res.send( getExercisesLog(rows) );
-      });
+    Exercise.findAndCountAll({
+        where: { UserId: userId },
+        include: { model: User, required: true },
+        limit
+    })
+    .then(exercises => {
+        res.json(exercises);
+    })
+    .catch(error => {
+        res.status(404).send(error);
+    })
 }
 
 const addExercise = (req, res) => {
     const userId = req.params._id
     const { description, duration, date } = req.body
 
-    const dated = date ? new Date(date) : new Date()
+    const exerciseDate = date ? new Date(date) : new Date()
 
-    db.run(`INSERT INTO exercises (_id, user_id, description, duration, date) VALUES (?,?,?,?,?)`,
-    [uuidv4(), userId, description, duration, dated.toISOString() ],
-    function (err) {
-        if (err) {
-            res.status(400).json({ "error": err.message })
-            return;
-        }
-        res.status(201).json({
-            "exercise_id": this.lastID
-        })
-    });
-}  
+    Exercise.create({
+        description,
+        duration,
+        date: exerciseDate,
+        UserId: userId
+    })
+    .then(exercise => {
+        res.json(exercise._id);
+    })
+    .catch(error => {
+        res.status(404).send(error);
+    })
+}
 
 const getUsers = (_, res) => {
-  const sql = "SELECT * FROM User ORDER BY username";
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      return console.error(err.message);
-    }
-    res.send({ rows });
-  });
-}
+    User.findAll()
+        .then(users => {
+            res.json(users);
+        })
+        .catch(error => {
+            res.status(404).send(error);
+        })
+  }
 
 module.exports = {
     addExercise,
-    addUser,
+    createUser,
     getUsers,
     getExerciseLog
 }  

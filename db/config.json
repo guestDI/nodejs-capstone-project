@@ -1,0 +1,12 @@
+{
+    "development": {
+      "username": "root",
+      "password": null,
+      "database": "exercises",
+      "host": "my.dev.server",
+      "dialect": "sqlite",
+      "storage": "./exercises.sqlite",
+      "sync": { "force": false },
+      "pool": { "maxConnections": 5, "maxIdleTime": 30}
+    }
+  }

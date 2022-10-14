@@ -6,6 +6,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser');
 require('dotenv').config()
 const { db } = require('./db/db')
+const sequelize = require('./db/database')
 
 const usersRoutes = require("./routes/users")
 
@@ -41,10 +42,10 @@ CREATE TABLE IF NOT EXISTS Exercises (
 );
 `
 
-db.exec(init_sql, err => {
-  if (err) {
-    return console.error(err.message);
-  }
+// db.exec(init_sql, err => {
+//   if (err) {
+//     return console.error(err.message);
+//   }
 
   // const sql_insert = `INSERT INTO User (username) VALUES
   // ('Mrs. Bridge'),
@@ -56,8 +57,18 @@ db.exec(init_sql, err => {
   //   }
   //   console.log("Successful creation of 2 users");
   // });
-});
+// });
 
+sequelize
+  .sync({
+    logging: console.log
+  })
+  .then(() => {
+    console.log('Connection to database established successfully.');
+  })
+  .catch(err => {
+    console.log('Unable to connect to the database: ', err);
+})
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
