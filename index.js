@@ -27,12 +27,12 @@ app.use((_, res) => {
 
 const init_sql = `
 CREATE TABLE IF NOT EXISTS User (
-  _id INTEGER PRIMARY KEY AUTOINCREMENT,
+  _id VARCHAR(100) PRIMARY KEY,
   username VARCHAR(60) NOT NULL unique
 );
 
 CREATE TABLE IF NOT EXISTS Exercises (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  _id VARCHAR(100) PRIMARY KEY,
   user_id INTEGER,
   description TEXT NOT NULL,
   duration INTEGER NOT NULL,
@@ -46,16 +46,16 @@ db.exec(init_sql, err => {
     return console.error(err.message);
   }
 
-  const sql_insert = `INSERT INTO User (username) VALUES
-  ('Mrs. Bridge'),
-  ('Libertine');`;
+  // const sql_insert = `INSERT INTO User (username) VALUES
+  // ('Mrs. Bridge'),
+  // ('Libertine');`;
 
-  db.run(sql_insert, err => {
-    if (err) {
-      return console.error(err.message);
-    }
-    console.log("Successful creation of 2 users");
-  });
+  // db.run(sql_insert, err => {
+  //   if (err) {
+  //     return console.error(err.message);
+  //   }
+  //   console.log("Successful creation of 2 users");
+  // });
 });
 
 
