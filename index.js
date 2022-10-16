@@ -5,7 +5,6 @@ const app = express()
 const cors = require('cors')
 const bodyParser = require('body-parser');
 require('dotenv').config()
-const { db } = require('./db/db')
 const sequelize = require('./db/database')
 
 const usersRoutes = require("./routes/users")
@@ -22,42 +21,6 @@ app.get('/', (_, res) => {
 app.use((_, res) => {
   res.status(404).sendFile(__dirname + '/views/404.html')
 })
-
-// const db_sql_path = path.join(__dirname, 'db', 'repository.sql');
-// const init_sql = fs.readFileSync(db_sql_path, 'utf-8')
-
-const init_sql = `
-CREATE TABLE IF NOT EXISTS User (
-  _id VARCHAR(100) PRIMARY KEY,
-  username VARCHAR(60) NOT NULL unique
-);
-
-CREATE TABLE IF NOT EXISTS Exercises (
-  _id VARCHAR(100) PRIMARY KEY,
-  user_id INTEGER,
-  description TEXT NOT NULL,
-  duration INTEGER NOT NULL,
-  date TEXT,
-  FOREIGN KEY (user_id) REFERENCES user (_id)
-);
-`
-
-// db.exec(init_sql, err => {
-//   if (err) {
-//     return console.error(err.message);
-//   }
-
-  // const sql_insert = `INSERT INTO User (username) VALUES
-  // ('Mrs. Bridge'),
-  // ('Libertine');`;
-
-  // db.run(sql_insert, err => {
-  //   if (err) {
-  //     return console.error(err.message);
-  //   }
-  //   console.log("Successful creation of 2 users");
-  // });
-// });
 
 sequelize
   .sync({

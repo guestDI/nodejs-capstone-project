@@ -10,7 +10,7 @@ const Exercise = sequelize.define('Exercise', {
         },
     description: Sequelize.STRING,
     duration: Sequelize.INTEGER,
-    date: Sequelize.DATE
+    date: Sequelize.DATE,
 }, {
     timestamps: false
 })
