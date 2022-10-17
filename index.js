@@ -8,11 +8,13 @@ require('dotenv').config()
 const sequelize = require('./db/database')
 
 const usersRoutes = require("./routes/users")
+const exercisesRoutes = require("./routes/exercises")
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors())
 app.use('/api', usersRoutes)
+app.use('/api', exercisesRoutes)
 app.use(express.static('public'))
 app.get('/', (_, res) => {
   res.sendFile(__dirname + '/views/index.html')

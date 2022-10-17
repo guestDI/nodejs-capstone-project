@@ -1,8 +1,7 @@
-const { Op, Sequelize } = require('sequelize')
+const { Op } = require('sequelize')
 const { transformExercisesLog } = require('../utils')
 const User = require('../models/user')
 const Exercise = require('../models/exercise')
-const sequelize = require('../db/database')
 
 const createUser = (req, res) => {
     User.create({
@@ -25,15 +24,18 @@ const getExercisesLogByUser = (req, res) => {
         res.status(400).send('Bad Request');
     }
 
+    const dateFilter = {
+        ...(to && {[Op.lt]: new Date(new Date(to).getTime() + 60 * 60 * 24 * 1000 - 1)}),
+        ...(from && {[Op.gt]: new Date(from)}),
+    }
+
     const exerciseAttributes = ['user.username', 'description', 'duration', 'date', 'user._id'];
     Exercise.findAll({
         attributes : exerciseAttributes,
         raw: true,
         where: { 
             UserId: userId,
-            date: {
-                [Op.lt]: new Date(new Date("2022-10-14").getTime() + 60 * 60 * 24 * 1000 - 1)
-            }
+            ...((from || to) && {date: dateFilter})
         },
         include: { model: User, required: true, attributes: [] },
         limit
@@ -51,13 +53,11 @@ const addExercise = (req, res) => {
     const userId = req.params._id
     const { description, duration, date } = req.body
 
-    const exerciseDate = date ? new Date(date) : new Date()
-
     Exercise.create({
         description,
         duration,
-        date: exerciseDate,
-        UserId: userId
+        UserId: userId,
+        ...(date && {date: new Date(date)}),
     })
     .then(exercise => {
         res.json(exercise._id);
@@ -66,24 +66,6 @@ const addExercise = (req, res) => {
         res.status(404).send(error);
     })
 }
-
-const getExercise = (req, res) => {
-    const exerciseId = req.params._id
-
-    const exerciseAttributes = ['user.username', 'description', 'duration', 'date', '_id'];
-    Exercise.findByPk(exerciseId, {
-        attributes : exerciseAttributes,
-        raw: true,
-        include: { model: User, required: false, attributes: [] },
-    })
-        .then(exercise => {
-            res.json(exercise);
-        })
-        .catch(error => {
-            res.status(404).send(error);
-        })
-}
-
 
 const getUsers = (_, res) => {
     User.findAll()
@@ -99,6 +81,5 @@ module.exports = {
     addExercise,
     createUser,
     getUsers,
-    getExercisesLogByUser,
-    getExercise
+    getExercisesLogByUser
 }  

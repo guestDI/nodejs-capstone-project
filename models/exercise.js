@@ -8,13 +8,33 @@ const Exercise = sequelize.define('Exercise', {
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
         },
-    description: Sequelize.STRING,
-    duration: Sequelize.INTEGER,
-    date: Sequelize.DATE,
-}, {
+    description: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+            notEmpty: true
+        }
+    },
+    duration: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        validate: {
+            notEmpty: true,
+            isNumeric: true,
+            isInt: true
+        }
+    },
+    date: {
+        type: Sequelize.DATE,
+        defaultValue: new Date()
+    },
+}, 
+{
     timestamps: false
-})
+}
+)
 
-Exercise.belongsTo(User, { constraints: true, onDelete: 'CASCADE' })
+Exercise.belongsTo(User, { constraints: true })
+User.hasMany(Exercise)
 
 module.exports = Exercise
