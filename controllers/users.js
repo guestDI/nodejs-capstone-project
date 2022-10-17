@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { transformExercisesLog } = require("../utils");
+const { transformExercisesLog, parseDatabaseError } = require("../utils");
 const User = require("../models/user");
 const Exercise = require("../models/exercise");
 
@@ -11,7 +11,9 @@ const createUser = (req, res) => {
       res.json(user._id);
     })
     .catch((error) => {
-      res.status(404).send(error);
+      return res.send({
+        errors: parseDatabaseError(error),
+      });
     });
 };
 
@@ -19,10 +21,6 @@ const getExercisesLogByUser = (req, res) => {
   const userId = req.params.userId;
 
   const { to, from, limit } = req.query;
-
-  if (limit === "" || to === "" || from === "") {
-    res.status(400).send("Bad Request");
-  }
 
   const dateFilter = {
     ...(to && {
@@ -38,7 +36,8 @@ const getExercisesLogByUser = (req, res) => {
     "date",
     "user._id",
   ];
-  Exercise.findAll({
+
+  Exercise.findAndCountAll({
     attributes: exerciseAttributes,
     raw: true,
     where: {
@@ -50,10 +49,9 @@ const getExercisesLogByUser = (req, res) => {
   })
     .then((exercises) => {
       res.json(transformExercisesLog(exercises));
-      // res.json(exercises)
     })
     .catch((error) => {
-      res.status(404).send(error);
+      return res.status(400).send(error);
     });
 };
 
@@ -71,7 +69,7 @@ const addExercise = (req, res) => {
       res.json(exercise._id);
     })
     .catch((error) => {
-      res.status(404).send(error);
+      return res.status(400).send(error);
     });
 };
 
@@ -81,7 +79,7 @@ const getUsers = (_, res) => {
       res.json(users);
     })
     .catch((error) => {
-      res.status(404).send(error);
+      return res.status(402).send(error);
     });
 };
 

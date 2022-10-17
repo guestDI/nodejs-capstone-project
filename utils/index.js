@@ -1,7 +1,7 @@
-const transformExercisesLog = (exercises) => {
+const transformExercisesLog = ({ count, rows }) => {
   let username, _id;
 
-  const exercisesLog = exercises.map((exercise) => {
+  const exercisesLog = rows.map((exercise) => {
     username = username ?? exercise.username;
     _id = _id ?? exercise._id;
 
@@ -14,12 +14,21 @@ const transformExercisesLog = (exercises) => {
 
   return {
     username,
-    count: exercisesLog.length,
+    count,
     _id,
     log: exercisesLog,
   };
 };
 
+const parseDatabaseError = (error) => {
+  return error.errors.map((e) => {
+    return {
+      [e.path]: e.message,
+    };
+  });
+};
+
 module.exports = {
   transformExercisesLog,
+  parseDatabaseError,
 };
