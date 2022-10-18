@@ -17,7 +17,7 @@ const getUsers = async (_, res, next) => {
   }
 };
 
-const createUser = async (req, res, next) => {
+const createUser = async (req, res) => {
   try {
     const user = await User.create({
       username: req.body.username,
