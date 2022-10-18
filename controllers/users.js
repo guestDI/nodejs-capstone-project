@@ -1,23 +1,35 @@
 const { Op } = require("sequelize");
-const { transformExercisesLog, parseDatabaseError } = require("../utils");
+const {
+  transformExercisesLog,
+  parseDatabaseError,
+  transformExerciseResponse,
+} = require("../utils");
 const User = require("../models/user");
 const Exercise = require("../models/exercise");
 
-const createUser = (req, res) => {
-  User.create({
-    username: req.body.username,
-  })
-    .then((user) => {
-      res.json(user._id);
-    })
-    .catch((error) => {
-      return res.send({
-        errors: parseDatabaseError(error),
-      });
-    });
+const getUsers = async (_, res, next) => {
+  try {
+    const users = await User.findAll();
+    res.json(users);
+  } catch (error) {
+    error.statusCode = 404;
+    next(error);
+  }
 };
 
-const getExercisesLogByUser = (req, res) => {
+const createUser = async (req, res, next) => {
+  try {
+    const user = await User.create({
+      username: req.body.username,
+    });
+
+    res.json(user);
+  } catch (error) {
+    return res.send(parseDatabaseError(error));
+  }
+};
+
+const getExercisesLogByUser = async (req, res, next) => {
   const userId = req.params.userId;
 
   const { to, from, limit } = req.query;
@@ -37,50 +49,40 @@ const getExercisesLogByUser = (req, res) => {
     "user._id",
   ];
 
-  Exercise.findAndCountAll({
-    attributes: exerciseAttributes,
-    raw: true,
-    where: {
-      UserId: userId,
-      ...((from || to) && { date: dateFilter }),
-    },
-    include: { model: User, required: true, attributes: [] },
-    limit,
-  })
-    .then((exercises) => {
-      res.json(transformExercisesLog(exercises));
-    })
-    .catch((error) => {
-      return res.status(400).send(error);
+  try {
+    const exercises = await Exercise.findAndCountAll({
+      attributes: exerciseAttributes,
+      raw: true,
+      where: {
+        userId: userId,
+        ...((from || to) && { date: dateFilter }),
+      },
+      include: { model: User, required: true, attributes: [] },
+      limit,
     });
+
+    res.json(transformExercisesLog(exercises));
+  } catch (error) {
+    next(error);
+  }
 };
 
-const addExercise = (req, res) => {
+const addExercise = async (req, res) => {
   const userId = req.params._id;
   const { description, duration, date } = req.body;
 
-  Exercise.create({
-    description,
-    duration,
-    UserId: userId,
-    ...(date && { date: new Date(date) }),
-  })
-    .then((exercise) => {
-      res.json(exercise._id);
-    })
-    .catch((error) => {
-      return res.status(400).send(error);
+  try {
+    const exercise = await Exercise.create({
+      description,
+      duration: parseInt(duration),
+      userId: userId,
+      ...(date && { date: new Date(date) }),
     });
-};
 
-const getUsers = (_, res) => {
-  User.findAll()
-    .then((users) => {
-      res.json(users);
-    })
-    .catch((error) => {
-      return res.status(402).send(error);
-    });
+    res.json(transformExerciseResponse(exercise));
+  } catch (error) {
+    return next(error);
+  }
 };
 
 module.exports = {

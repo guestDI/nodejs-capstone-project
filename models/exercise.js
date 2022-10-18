@@ -3,7 +3,7 @@ const sequelize = require("../db/database");
 const User = require("./user");
 
 const Exercise = sequelize.define(
-  "Exercise",
+  "exercise",
   {
     _id: {
       type: Sequelize.UUID,
@@ -35,8 +35,5 @@ const Exercise = sequelize.define(
     timestamps: false,
   }
 );
-
-Exercise.belongsTo(User, { constraints: true });
-User.hasMany(Exercise);
 
 module.exports = Exercise;

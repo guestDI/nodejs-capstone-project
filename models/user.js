@@ -1,8 +1,9 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../db/database");
+const Exercise = require("./exercise");
 
 const User = sequelize.define(
-  "User",
+  "user",
   {
     _id: {
       type: Sequelize.UUID,
@@ -22,5 +23,8 @@ const User = sequelize.define(
     timestamps: false,
   }
 );
+
+User.hasMany(Exercise, { onDelete: "CASCADE" });
+Exercise.belongsTo(User, { constraints: true });
 
 module.exports = User;

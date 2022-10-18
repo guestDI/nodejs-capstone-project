@@ -5,27 +5,33 @@ const userValidationRules = () => {
     .isLength({ min: 3 })
     .withMessage("username must be at least 3 chars")
     .trim()
-    .escape()
+    .escape();
 };
 
 const exerciseValidationRules = () => {
-  return check(["description", "duration"])
-    .notEmpty()
-    .withMessage((_, { path }) => {
-      return `${path} should not be empty`;
-    })
-    .trim()
-    .escape()
+  return [
+    check("description")
+      .notEmpty()
+      .withMessage((_, { path }) => {
+        return `${path} should not be empty`;
+      })
+      .trim()
+      .escape(),
+    check("duration")
+      .notEmpty()
+      .isInt()
+      .withMessage("duration should be an integer"),
+  ];
 };
 
 const queryLogValidationRules = () => {
   return [
-    check("limit").isInt().withMessage("limit must be a number"),
+    check("limit").optional().isInt().withMessage("limit must be a number"),
     check(["from", "to"])
       .optional()
       .isISO8601()
       .withMessage((_, { path }) => `'${path}' should be a valid date value`)
-      .trim()
+      .trim(),
   ];
 };
 

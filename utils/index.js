@@ -28,7 +28,15 @@ const parseDatabaseError = (error) => {
   });
 };
 
+const transformExerciseResponse = (exercise) => {
+  return {
+    ...exercise.dataValues,
+    date: exercise.dataValues.date.toDateString(),
+  };
+};
+
 module.exports = {
   transformExercisesLog,
   parseDatabaseError,
+  transformExerciseResponse,
 };
