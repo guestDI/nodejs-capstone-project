@@ -1,6 +1,8 @@
 const { validationResult } = require("express-validator");
 const User = require("../models/user");
 
+const dateRegex = /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/i;
+
 const createUserSchema = {
   username: {
     in: ["body"],
@@ -20,11 +22,11 @@ const createUserSchema = {
       },
     },
     isString: {
-      errorMessage: "username must be a string",
+      errorMessage: "Username must be a string",
     },
     isLength: {
       options: { min: 3 },
-      errorMessage: "username must be at least 3 chars",
+      errorMessage: "Username must be at least 3 chars",
     },
     trim: true,
     escape: true,
@@ -68,8 +70,8 @@ const createExerciseSchema = {
     in: ["body"],
     optional: true,
     matches: {
-      options: /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/i,
-      errorMessage: "Date must be in a correct format, e.g. 2022-10-13"
+      options: dateRegex,
+      errorMessage: "Date must be in a correct format, e.g. 2022-10-13",
     },
     trim: true,
   },
@@ -91,17 +93,25 @@ const getExercisesLogSchema = {
     in: ["params"],
     optional: true,
     matches: {
-      options: /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/i,
-      errorMessage: "'From' must be in a correct format, e.g. 2022-10-13"
+      options: dateRegex,
+      errorMessage: "'From' must be in a correct format, e.g. 2022-10-13",
     },
   },
   to: {
     in: ["params"],
     optional: true,
     matches: {
-      options: /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/i,
-      errorMessage: "'To' must be in a correct format, e.g. 2022-10-13"
+      options: dateRegex,
+      errorMessage: "'To' must be in a correct format, e.g. 2022-10-13",
     },
+  },
+};
+
+const getExerciseSchema = {
+  _id: {
+    in: ["params"],
+    notEmpty: true,
+    errorMessage: "ExerciseId is missed",
   },
 };
 
@@ -124,5 +134,6 @@ module.exports = {
   createUserSchema,
   createExerciseSchema,
   getExercisesLogSchema,
+  getExerciseSchema,
   validate,
 };
