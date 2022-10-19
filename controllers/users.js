@@ -13,11 +13,11 @@ const getUsers = async (_, res, next) => {
     res.json(users);
   } catch (error) {
     error.statusCode = 404;
-    next(error);
+    return next(error);
   }
 };
 
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
   try {
     const user = await User.create({
       username: req.body.username,
@@ -25,7 +25,7 @@ const createUser = async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    return res.send(parseDatabaseError(error));
+    return next(parseDatabaseError(error));
   }
 };
 
@@ -63,11 +63,11 @@ const getExercisesLogByUser = async (req, res, next) => {
 
     res.json(transformExercisesLog(exercises));
   } catch (error) {
-    next(error);
+    return next(parseDatabaseError(error));
   }
 };
 
-const addExercise = async (req, res) => {
+const addExercise = async (req, res, next) => {
   const userId = req.params._id;
   const { description, duration, date } = req.body;
 
@@ -81,7 +81,7 @@ const addExercise = async (req, res) => {
 
     res.json(transformExerciseResponse(exercise));
   } catch (error) {
-    return next(error);
+    return next(parseDatabaseError(error));
   }
 };
 

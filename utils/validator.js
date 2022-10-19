@@ -1,38 +1,108 @@
-const { check, validationResult } = require("express-validator");
+const { validationResult } = require("express-validator");
+const User = require("../models/user");
 
-const userValidationRules = () => {
-  return check("username")
-    .isLength({ min: 3 })
-    .withMessage("username must be at least 3 chars")
-    .trim()
-    .escape();
+const createUserSchema = {
+  username: {
+    in: ["body"],
+    custom: {
+      options: (value) => {
+        if (value.length) {
+          return User.findOne({
+            username: value,
+          }).then((user) => {
+            if (user) {
+              return Promise.reject("User already exist");
+            }
+          });
+        }
+
+        return true;
+      },
+    },
+    isString: {
+      errorMessage: "username must be a string",
+    },
+    isLength: {
+      options: { min: 3 },
+      errorMessage: "username must be at least 3 chars",
+    },
+    trim: true,
+    escape: true,
+  },
 };
 
-const exerciseValidationRules = () => {
-  return [
-    check("description")
-      .notEmpty()
-      .withMessage((_, { path }) => {
-        return `${path} should not be empty`;
-      })
-      .trim()
-      .escape(),
-    check("duration")
-      .notEmpty()
-      .isInt()
-      .withMessage("duration should be an integer"),
-  ];
+const createExerciseSchema = {
+  _id: {
+    in: ["params"],
+    custom: {
+      options: (value) => {
+        return User.findByPk(value).then((user) => {
+          if (!user) {
+            return Promise.reject("User doesn't exist");
+          }
+        });
+      },
+    },
+  },
+  description: {
+    in: ["body"],
+    notEmpty: {
+      errorMessage: "Description field cannot be empty",
+    },
+    isString: {
+      errorMessage: "Description must be a string",
+    },
+    trim: true,
+    escape: true,
+  },
+  duration: {
+    in: ["body"],
+    notEmpty: {
+      errorMessage: "Duration field cannot be empty",
+    },
+    isInt: {
+      errorMessage: "Duration must be an integer",
+    },
+  },
+  date: {
+    in: ["body"],
+    optional: true,
+    matches: {
+      options: /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/i,
+      errorMessage: "Date must be in a correct format, e.g. 2022-10-13"
+    },
+    trim: true,
+  },
 };
 
-const queryLogValidationRules = () => {
-  return [
-    check("limit").optional().isInt().withMessage("limit must be a number"),
-    check(["from", "to"])
-      .optional()
-      .isISO8601()
-      .withMessage((_, { path }) => `'${path}' should be a valid date value`)
-      .trim(),
-  ];
+const getExercisesLogSchema = {
+  _id: {
+    in: ["params"],
+    notEmpty: true,
+    errorMessage: "UserId is missed",
+  },
+  limit: {
+    in: ["params"],
+    optional: true,
+    isInt: true,
+    errorMessage: "Limit must be a valid number",
+  },
+  from: {
+    in: ["params"],
+    optional: true,
+    matches: {
+      options: /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/i,
+      errorMessage: "'From' must be in a correct format, e.g. 2022-10-13"
+    },
+  },
+  to: {
+    in: ["params"],
+    optional: true,
+    matches: {
+      options: /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/i,
+      errorMessage: "'To' must be in a correct format, e.g. 2022-10-13"
+    },
+  },
 };
 
 const validate = (req, res, next) => {
@@ -40,17 +110,19 @@ const validate = (req, res, next) => {
   if (errors.isEmpty()) {
     return next();
   }
-  const extractedErrors = [];
-  errors.array().map((err) => extractedErrors.push({ [err.param]: err.msg }));
 
-  return res.status(422).json({
+  const extractedErrors = errors
+    .array()
+    .map((err) => ({ [err.param]: err.msg }));
+
+  return res.status(400).json({
     errors: extractedErrors,
   });
 };
 
 module.exports = {
-  userValidationRules,
+  createUserSchema,
+  createExerciseSchema,
+  getExercisesLogSchema,
   validate,
-  exerciseValidationRules,
-  queryLogValidationRules,
 };

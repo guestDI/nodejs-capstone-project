@@ -18,17 +18,17 @@ describe("GET /users", () => {
       .expect(200, done);
   });
 
-//   it("should responds with empty array if no users", (done) => {
-//     request(app)
-//       .get("/api/users")
-//       .set("Accept", "application/json")
-//       .expect("Content-Type", /json/)
-//       .expect(200)
-//       .expect(
-//         [],
-//         done
-//       );
-//   });
+  //   it("should responds with empty array if no users", (done) => {
+  //     request(app)
+  //       .get("/api/users")
+  //       .set("Accept", "application/json")
+  //       .expect("Content-Type", /json/)
+  //       .expect(200)
+  //       .expect(
+  //         [],
+  //         done
+  //       );
+  //   });
 });
 
 describe("POST /users", () => {

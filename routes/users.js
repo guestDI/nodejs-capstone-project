@@ -1,9 +1,10 @@
 const express = require("express");
+const { checkSchema } = require("express-validator");
 const {
-  userValidationRules,
   validate,
-  exerciseValidationRules,
-  queryLogValidationRules,
+  createUserSchema,
+  createExerciseSchema,
+  getExercisesLogSchema,
 } = require("../utils/validator");
 
 const router = express.Router();
@@ -15,17 +16,17 @@ const {
   getExercisesLogByUser,
 } = require("../controllers/users");
 
-router.post("/users", userValidationRules(), validate, createUser);
+router.post("/users", checkSchema(createUserSchema), validate, createUser);
 router.get("/users", getUsers);
 router.post(
   "/users/:_id/exercises",
-  exerciseValidationRules(),
+  checkSchema(createExerciseSchema),
   validate,
   addExercise
 );
 router.get(
   "/users/:userId/logs",
-  queryLogValidationRules(),
+  checkSchema(getExercisesLogSchema),
   validate,
   getExercisesLogByUser
 );
