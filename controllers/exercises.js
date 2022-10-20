@@ -1,6 +1,6 @@
 const User = require("../models/user");
 const Exercise = require("../models/exercise");
-const { transformExerciseResponse } = require("../utils/index");
+const { transformExercise } = require("../utils/index");
 
 const getExerciseById = async (req, res, next) => {
   const exerciseId = req.params._id;
@@ -21,32 +21,27 @@ const getExerciseById = async (req, res, next) => {
     });
 
     if (!exercise) {
-      res.status(404).send("Not Found");
-      next();
+      return res.status(404).send("Not Found");
     }
-    res.json(exercise);
-    next();
+    res.status(200).json(exercise);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
     }
-    error.statusCode = 400;
-    next(error);
+    return next(error);
   }
 };
 
 const getExercises = async (_, res, next) => {
   try {
     const exercises = await Exercise.findAll();
-    const transformedExercises = exercises.map((ex) =>
-      transformExerciseResponse(ex)
-    );
-    res.json(transformedExercises);
+    const transformedExercises = exercises.map((ex) => transformExercise(ex));
+    res.status(200).json(transformedExercises);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
     }
-    next(error);
+    return next(error);
   }
 };
 

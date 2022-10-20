@@ -15,7 +15,10 @@ const User = sequelize.define(
       allowNull: false,
       unique: true,
       validate: {
-        notEmpty: true,
+        len: {
+          args: 3,
+          msg: "Username must be at least 3 chars",
+        },
       },
     },
   },

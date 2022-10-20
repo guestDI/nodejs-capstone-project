@@ -2,7 +2,7 @@ const { Op } = require("sequelize");
 const {
   transformExercisesLog,
   parseDatabaseError,
-  transformExerciseResponse,
+  transformExercise,
 } = require("../utils");
 const User = require("../models/user");
 const Exercise = require("../models/exercise");
@@ -10,22 +10,21 @@ const Exercise = require("../models/exercise");
 const getUsers = async (_, res, next) => {
   try {
     const users = await User.findAll();
-    res.json(users);
+    res.status(200).json(users);
   } catch (error) {
-    error.statusCode = 404;
     return next(error);
   }
 };
 
-const createUser = async (req, res, next) => {
+const createUser = async (req, res) => {
   try {
     const user = await User.create({
       username: req.body.username,
     });
 
-    res.json(user);
+    res.status(200).json(user);
   } catch (error) {
-    return next(parseDatabaseError(error));
+    return res.status(400).send(parseDatabaseError(error));
   }
 };
 
@@ -61,7 +60,7 @@ const getExercisesLogByUser = async (req, res, next) => {
       limit,
     });
 
-    res.json(transformExercisesLog(exercises));
+    res.status(200).json(transformExercisesLog(exercises));
   } catch (error) {
     return next(parseDatabaseError(error));
   }
@@ -79,7 +78,7 @@ const addExercise = async (req, res, next) => {
       ...(date && { date: new Date(date) }),
     });
 
-    res.json(transformExerciseResponse(exercise));
+    res.json(transformExercise(exercise));
   } catch (error) {
     return next(parseDatabaseError(error));
   }

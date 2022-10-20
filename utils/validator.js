@@ -78,11 +78,6 @@ const createExerciseSchema = {
 };
 
 const getExercisesLogSchema = {
-  _id: {
-    in: ["params"],
-    notEmpty: true,
-    errorMessage: "UserId is missed",
-  },
   limit: {
     in: ["params"],
     optional: true,
