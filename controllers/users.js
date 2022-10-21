@@ -1,65 +1,92 @@
-const { db } = require('../db/db') 
+const { Op } = require("sequelize");
+const {
+  transformExercisesLog,
+  parseDatabaseError,
+  transformExercise,
+} = require("../utils");
+const User = require("../models/user");
+const Exercise = require("../models/exercise");
 
-const addUser = (req, res) => {
-    db.run(`INSERT INTO user (username) VALUES (?)`,
-        [req.body.username],
-        function (err) {
-            if (err) {
-                res.status(400).json({ "error": err.message })
-                return;
-            }
-            res.status(201).json({
-                "user_id": this.lastID
-            })
-        });
-}
+const getUsers = async (_, res, next) => {
+  try {
+    const users = await User.findAll();
+    res.status(200).json(users);
+  } catch (error) {
+    return next(error);
+  }
+};
 
-const getExerciseLog = (req, res) => {
-    const userId = req.params.userId
-
-    const sql = `SELECT a.* FROM Exercises as a INNER JOIN User AS b 
-    ON a.user_id = b._id WHERE b._id = ${userId};`
-
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-          return console.error(err.message);
-        }
-        res.send({ rows });
-      });
-}
-
-const addExercise = (req, res) => {
-    const userId = req.params._id
-    const { description, duration, date } = req.body
-
-    const dateInMilliseconds = date ? new Date(date).getTime() : new Date().getTime()
-
-    db.run(`INSERT INTO exercises (user_id, description, duration, date) VALUES (?,?,?,?)`,
-    [userId, description, duration, dateInMilliseconds.toString()],
-    function (err) {
-        if (err) {
-            res.status(400).json({ "error": err.message })
-            return;
-        }
-        res.status(201).json({
-            "exercise_id": this.lastID
-        })
+const createUser = async (req, res) => {
+  try {
+    const user = await User.create({
+      username: req.body.username,
     });
-}  
 
-const getUsers = (_, res) => {
-  const sql = "SELECT * FROM User ORDER BY username";
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      return console.error(err.message);
-    }
-    res.send({ rows });
-  });
-}
+    res.status(200).json(user);
+  } catch (error) {
+    return res.status(400).send(parseDatabaseError(error));
+  }
+};
+
+const getExercisesLogByUser = async (req, res, next) => {
+  const userId = req.params.userId;
+
+  const { to, from, limit } = req.query;
+
+  const dateFilter = {
+    ...(to && {
+      [Op.lt]: new Date(new Date(to).getTime() + 60 * 60 * 24 * 1000 - 1),
+    }),
+    ...(from && { [Op.gt]: new Date(from) }),
+  };
+
+  const exerciseAttributes = [
+    "user.username",
+    "description",
+    "duration",
+    "date",
+    "user._id",
+  ];
+
+  try {
+    const exercises = await Exercise.findAndCountAll({
+      attributes: exerciseAttributes,
+      raw: true,
+      where: {
+        userId: userId,
+        ...((from || to) && { date: dateFilter }),
+      },
+      include: { model: User, required: true, attributes: [] },
+      limit,
+    });
+
+    res.status(200).json(transformExercisesLog(exercises));
+  } catch (error) {
+    return next(parseDatabaseError(error));
+  }
+};
+
+const addExercise = async (req, res, next) => {
+  const userId = req.params._id;
+  const { description, duration, date } = req.body;
+
+  try {
+    const exercise = await Exercise.create({
+      description,
+      duration: parseInt(duration),
+      userId: userId,
+      ...(date && { date: new Date(date) }),
+    });
+
+    res.status(200).json(transformExercise(exercise));
+  } catch (error) {
+    return next(parseDatabaseError(error));
+  }
+};
 
 module.exports = {
-    addExercise,
-    addUser,
-    getUsers,
-    getExerciseLog
-}  
+  addExercise,
+  createUser,
+  getUsers,
+  getExercisesLogByUser,
+};
