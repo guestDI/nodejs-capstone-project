@@ -8,7 +8,7 @@ const createUserSchema = {
     in: ["body"],
     custom: {
       options: (value) => {
-        if (value.length) {
+        if (value.length > 2) {
           return User.findOne({
             username: value,
           }).then((user) => {
@@ -79,13 +79,14 @@ const createExerciseSchema = {
 
 const getExercisesLogSchema = {
   limit: {
-    in: ["params"],
+    in: ["query"],
     optional: true,
-    isInt: true,
-    errorMessage: "Limit must be a valid number",
+    isInt: {
+      errorMessage: "Limit must be a valid number",
+    },
   },
   from: {
-    in: ["params"],
+    in: ["query"],
     optional: true,
     matches: {
       options: dateRegex,
@@ -93,7 +94,7 @@ const getExercisesLogSchema = {
     },
   },
   to: {
-    in: ["params"],
+    in: ["query"],
     optional: true,
     matches: {
       options: dateRegex,

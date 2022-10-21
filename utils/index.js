@@ -1,8 +1,6 @@
 const transformExercisesLog = ({ count, rows }) => {
   let username, _id;
 
-  console.log(count, rows);
-
   const exercisesLog = rows.map((exercise) => {
     username = username ?? exercise.username;
     _id = _id ?? exercise._id;

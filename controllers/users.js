@@ -78,7 +78,7 @@ const addExercise = async (req, res, next) => {
       ...(date && { date: new Date(date) }),
     });
 
-    res.json(transformExercise(exercise));
+    res.status(200).json(transformExercise(exercise));
   } catch (error) {
     return next(parseDatabaseError(error));
   }
