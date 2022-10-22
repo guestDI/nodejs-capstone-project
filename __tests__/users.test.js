@@ -11,7 +11,7 @@ const {
 } = require("../controllers/users");
 const { transformExercisesLog, transformExercise } = require("../utils/index");
 const users = require("../__mocks__/users");
-const { exercises } = require("../__mocks__/exercises");
+const { exercises, exercisesLog } = require("../__mocks__/exercises");
 
 describe("GET /users", () => {
   let mRes, mNext;
@@ -140,23 +140,13 @@ describe("GET /users/:userId/logs", () => {
   });
 
   it("should return exercises for a user", async () => {
-    const exercises = {
-      count: 1,
-      rows: [
-        {
-          description: "Desc",
-          duration: 60,
-          date: "2022-10-23 00:00:00.000 +00:00",
-          ...users[0],
-        },
-      ],
-    };
-
-    jest.spyOn(Exercise, "findAndCountAll").mockResolvedValueOnce(exercises);
+    jest.spyOn(Exercise, "findAndCountAll").mockResolvedValueOnce(exercisesLog);
 
     await getExercisesLogByUser(req, mRes, mNext);
     expect(mRes.status).toBeCalledWith(200);
-    expect(mRes.status().json).toBeCalledWith(transformExercisesLog(exercises));
+    expect(mRes.status().json).toBeCalledWith(
+      transformExercisesLog(exercisesLog)
+    );
   });
 
   it("should return empty array if user doesn't exist", async () => {
