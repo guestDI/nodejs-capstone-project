@@ -9,9 +9,8 @@ const createUserSchema = {
     custom: {
       options: (value) => {
         if (value.length > 2) {
-          return User.findOne({
-            username: value,
-          }).then((user) => {
+          console.log(value);
+          return User.findOne({ where: { username: value } }).then((user) => {
             if (user) {
               return Promise.reject("User already exist");
             }
