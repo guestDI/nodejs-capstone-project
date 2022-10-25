@@ -12,7 +12,7 @@ const router = express.Router();
 const {
   createUser,
   getUsers,
-  addExercise,
+  createExercise,
   getExercisesLogByUser,
 } = require("../controllers/users");
 
@@ -22,7 +22,7 @@ router.post(
   "/users/:_id/exercises",
   checkSchema(createExerciseSchema),
   validate,
-  addExercise
+  createExercise
 );
 router.get(
   "/users/:userId/logs",

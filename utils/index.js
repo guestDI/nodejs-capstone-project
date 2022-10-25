@@ -20,7 +20,7 @@ const transformExercisesLog = ({ count, rows }) => {
   };
 };
 
-const parseDatabaseError = (error) => {
+const transformError = (error) => {
   return error?.errors?.map((e) => {
     return {
       [e.path]: e.message,
@@ -37,6 +37,6 @@ const transformExercise = (exercise) => {
 
 module.exports = {
   transformExercisesLog,
-  parseDatabaseError,
+  transformError,
   transformExercise,
 };

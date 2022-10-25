@@ -6,7 +6,7 @@ const Exercise = require("../models/exercise");
 const {
   createUser,
   getUsers,
-  addExercise,
+  createExercise,
   getExercisesLogByUser,
 } = require("../controllers/users");
 const { transformExercisesLog, transformExercise } = require("../utils/index");
@@ -230,7 +230,7 @@ describe("POST /users/:_id/exercises", () => {
     };
     jest.spyOn(Exercise, "create").mockResolvedValueOnce(exercises[0]);
 
-    await addExercise(req, mRes, mNext);
+    await createExercise(req, mRes, mNext);
     expect(mRes.status).toBeCalledWith(200);
     expect(mRes.status().json).toBeCalledWith(transformExercise(exercises[0]));
   });
@@ -247,8 +247,7 @@ describe("POST /users/:_id/exercises", () => {
       .expect(
         {
           errors: [
-            { duration: "Duration field cannot be empty" },
-            { duration: "Duration must be an integer" },
+            { duration: "Duration must be an integer and greater than 0" },
           ],
         },
         done
@@ -268,7 +267,6 @@ describe("POST /users/:_id/exercises", () => {
         {
           errors: [
             { description: "Description field cannot be empty" },
-            { description: "Description must be a string" },
           ],
         },
         done

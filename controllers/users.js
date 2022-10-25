@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const {
   transformExercisesLog,
-  parseDatabaseError,
+  transformError,
   transformExercise,
 } = require("../utils");
 const User = require("../models/user");
@@ -24,7 +24,7 @@ const createUser = async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
-    return res.status(400).send(parseDatabaseError(error));
+    return res.status(400).send(transformError(error));
   }
 };
 
@@ -32,6 +32,16 @@ const getExercisesLogByUser = async (req, res, next) => {
   const userId = req.params.userId;
 
   const { to, from, limit } = req.query;
+
+  if (new Date(from).getTime() > new Date(to).getTime()) {
+    return res.status(400).json({
+      errors: [
+        {
+          from: "'from' cannot be greater than 'to'",
+        },
+      ],
+    });
+  }
 
   const dateFilter = {
     ...(to && {
@@ -56,17 +66,18 @@ const getExercisesLogByUser = async (req, res, next) => {
         userId: userId,
         ...((from || to) && { date: dateFilter }),
       },
+      order: [["date", "ASC"]],
       include: { model: User, required: true, attributes: [] },
       limit,
     });
 
     res.status(200).json(transformExercisesLog(exercises));
   } catch (error) {
-    return next(parseDatabaseError(error));
+    return next(transformError(error));
   }
 };
 
-const addExercise = async (req, res, next) => {
+const createExercise = async (req, res, next) => {
   const userId = req.params._id;
   const { description, duration, date } = req.body;
 
@@ -75,17 +86,17 @@ const addExercise = async (req, res, next) => {
       description,
       duration: parseInt(duration),
       userId: userId,
-      ...(date && { date: new Date(date) }),
+      ...(date && { date: new Date(date) }), // todays's date will be applied if date doen't exist
     });
 
     res.status(200).json(transformExercise(exercise));
   } catch (error) {
-    return next(parseDatabaseError(error));
+    return next(transformError(error));
   }
 };
 
 module.exports = {
-  addExercise,
+  createExercise,
   createUser,
   getUsers,
   getExercisesLogByUser,

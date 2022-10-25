@@ -9,7 +9,6 @@ const createUserSchema = {
     custom: {
       options: (value) => {
         if (value.length > 2) {
-          console.log(value);
           return User.findOne({ where: { username: value } }).then((user) => {
             if (user) {
               return Promise.reject("User already exist");
@@ -50,24 +49,21 @@ const createExerciseSchema = {
     notEmpty: {
       errorMessage: "Description field cannot be empty",
     },
-    isString: {
-      errorMessage: "Description must be a string",
-    },
     trim: true,
     escape: true,
   },
   duration: {
     in: ["body"],
-    notEmpty: {
-      errorMessage: "Duration field cannot be empty",
-    },
     isInt: {
-      errorMessage: "Duration must be an integer",
+      options: {
+        min: 1,
+      },
+      errorMessage: "Duration must be an integer and greater than 0",
     },
   },
   date: {
     in: ["body"],
-    optional: true,
+    optional: { options: { nullable: true, checkFalsy: true } },
     matches: {
       options: dateRegex,
       errorMessage: "Date must be in a correct format, e.g. 2022-10-13",
