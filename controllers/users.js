@@ -33,16 +33,6 @@ const getExercisesLogByUser = async (req, res, next) => {
 
   const { to, from, limit } = req.query;
 
-  if (new Date(from).getTime() > new Date(to).getTime()) {
-    return res.status(400).json({
-      errors: [
-        {
-          from: "'from' cannot be greater than 'to'",
-        },
-      ],
-    });
-  }
-
   const dateFilter = {
     ...(to && {
       [Op.lt]: new Date(new Date(to).getTime() + 60 * 60 * 24 * 1000 - 1),
