@@ -265,9 +265,7 @@ describe("POST /users/:_id/exercises", () => {
       .expect(400)
       .expect(
         {
-          errors: [
-            { description: "Description field cannot be empty" },
-          ],
+          errors: [{ description: "Description field cannot be empty" }],
         },
         done
       );

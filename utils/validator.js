@@ -82,10 +82,22 @@ const getExercisesLogSchema = {
   },
   from: {
     in: ["query"],
-    optional: true,
+    optional: { options: { nullable: true, checkFalsy: true } },
     matches: {
       options: dateRegex,
       errorMessage: "'From' must be in a correct format, e.g. 2022-10-13",
+    },
+    custom: {
+      options: (value, { req }) => {
+        if (
+          req.query.to &&
+          new Date(req.query.to).getTime() < new Date(value).getTime()
+        ) {
+          return Promise.reject("'from' cannot be greater than 'to'");
+        }
+
+        return value;
+      },
     },
   },
   to: {
