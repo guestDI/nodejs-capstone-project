@@ -36,7 +36,7 @@ const getExercisesLogByUser = async (req, res, next) => {
   const dateFilter = {
     ...(from && { [Op.gte]: new Date(from).getTime() }),
     ...(to && {
-      [Op.lt]: new Date(new Date(to).getTime()),
+      [Op.lte]: new Date(new Date(to).getTime()),
     }),
   };
 
